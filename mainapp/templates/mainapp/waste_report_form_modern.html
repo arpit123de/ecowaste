@@ -1,0 +1,388 @@
+{% extends 'mainapp/base.html' %}
+
+{% block title %}Report Waste - EcoWaste{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="text-center mb-4 fade-in">
+                <div class="icon-box icon-box-green mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2.5rem;">
+                    <i class="bi bi-camera-fill"></i>
+                </div>
+                <h2 class="mb-2">Report Waste</h2>
+                <p class="text-muted">Help us keep the environment clean</p>
+            </div>
+
+            <!-- Form Card -->
+            <div class="modern-card mb-4 fade-in delay-1">
+                <div class="modern-card-body">
+                    {% if form.errors %}
+                    <div class="alert alert-danger border-0 d-flex align-items-start mb-4" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-3 mt-1" style="font-size: 1.5rem;"></i>
+                        <div>
+                            <h6 class="alert-heading mb-2">Please fix the following errors:</h6>
+                            <ul class="mb-0 small">
+                                {% for field, errors in form.errors.items %}
+                                    {% for error in errors %}
+                                        <li><strong>{{ field }}:</strong> {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <form method="post" enctype="multipart/form-data" id="wasteReportForm" class="form-modern">
+                        {% csrf_token %}
+                        
+                        <!-- Step 1: Photo Upload -->
+                        <div class="mb-5">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="icon-box icon-box-green me-3" style="width: 50px; height: 50px; font-size: 1.3rem;">
+                                    <i class="bi bi-camera-fill"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0 fw-semibold">Step 1: Take Photo</h5>
+                                    <small class="text-muted">Capture a clear image of the waste</small>
+                                </div>
+                            </div>
+                            
+                            <div style="display: none;">
+                                {{ form.image }}
+                            </div>
+                            
+                            <div class="d-grid gap-3">
+                                <button type="button" class="btn btn-modern btn-modern-primary btn-modern-lg" id="camera_btn">
+                                    <i class="bi bi-camera-fill me-2"></i>Take Photo
+                                </button>
+                                <div class="text-center">
+                                    <small class="text-muted">Max 5MB • JPG/PNG • AI will auto-detect waste</small>
+                                </div>
+                            </div>
+                            
+                            {% if form.image.errors %}
+                            <div class="text-danger small mt-2">{{ form.image.errors }}</div>
+                            {% endif %}
+                            
+                            <!-- AI Processing Status -->
+                            <div id="aiProcessing" style="display: none;" class="mt-3">
+                                <div class="glass-card p-3 text-center">
+                                    <div class="spinner-modern mb-3"></div>
+                                    <p class="mb-0 fw-semibold">AI is analyzing your photo...</p>
+                                    <small class="text-muted">This may take a few seconds</small>
+                                </div>
+                            </div>
+                            
+                            <!-- Image preview -->
+                            <div id="imagePreview" class="mt-3"></div>
+                        </div>
+                        
+                        <!-- Step 2: AI Detected Details -->
+                        <div id="aiResults" style="display: none;" class="mb-5">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="icon-box icon-box-blue me-3" style="width: 50px; height: 50px; font-size: 1.3rem;">
+                                    <i class="bi bi-robot"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0 fw-semibold">Step 2: AI Detected Details</h5>
+                                    <small class="text-muted">Review and adjust if needed</small>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-success border-0 d-flex align-items-center mb-3">
+                                <i class="bi bi-check-circle-fill me-2" style="font-size: 1.5rem;"></i>
+                                <div>
+                                    <strong>Waste identified!</strong>
+                                    <p class="mb-0 mt-1 small" id="aiDescription"></p>
+                                </div>
+                            </div>
+                            
+                            <input type="hidden" id="detectedWasteType" name="detected_waste_type">
+                            <input type="hidden" id="detectedMaterials" name="detected_materials">
+                            <input type="hidden" id="detectedConfidence" name="detected_confidence">
+                            
+                            <div class="mb-3">
+                                <label class="form-label-modern">
+                                    Waste Type <span class="badge bg-success bg-opacity-10 text-success">AI Detected</span>
+                                </label>
+                                {{ form.waste_type }}
+                                <small class="form-text text-muted">You can change this if incorrect</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label-modern">Materials Detected</label>
+                                <div id="materialsList" class="glass-card p-3"></div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label-modern">Waste Condition</label>
+                                {{ form.waste_condition }}
+                            </div>
+                        </div>
+                        
+                        <!-- Step 3: Weight -->
+                        <div id="weightSection" style="display: none;" class="mb-5">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="icon-box icon-box-orange me-3" style="width: 50px; height: 50px; font-size: 1.3rem;">
+                                    <i class="bi bi-speedometer2"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0 fw-semibold">Step 3: Confirm Weight</h5>
+                                    <small class="text-muted">Verify the estimated weight</small>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label-modern">
+                                        Estimated Weight (kg) <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.exact_quantity }}
+                                    <small class="form-text text-muted">
+                                        <i class="bi bi-robot"></i> AI estimated: <span id="aiWeight" class="fw-semibold">-</span> kg
+                                    </small>
+                                    {% if form.exact_quantity.errors %}
+                                    <div class="text-danger small">{{ form.exact_quantity.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label-modern">Quantity Type</label>
+                                    {{ form.quantity_type }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Hidden User Info -->
+                        <div style="display: none;">
+                            {{ form.name }}
+                            {{ form.mobile_number }}
+                            {{ form.email }}
+                            {{ form.waste_type_other }}
+                        </div>
+                        
+                        <!-- Step 4: Location -->
+                        <div class="mb-5">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="icon-box icon-box-purple me-3" style="width: 50px; height: 50px; font-size: 1.3rem;">
+                                    <i class="bi bi-geo-alt-fill"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0 fw-semibold">Location Details</h5>
+                                    <small class="text-muted">Where is the waste located?</small>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    {{ form.location_auto }}
+                                    <label class="form-check-label fw-semibold" for="location_auto">
+                                        <i class="bi bi-crosshair me-2"></i>Use my current location (GPS)
+                                    </label>
+                                </div>
+                                <div id="gps_status" class="mt-2"></div>
+                            </div>
+                            
+                            {{ form.latitude }}
+                            {{ form.longitude }}
+                            
+                            <div id="manual_location">
+                                <div class="mb-3">
+                                    <label class="form-label-modern">Area / Street Name</label>
+                                    {{ form.area }}
+                                    {% if form.area.errors %}
+                                    <div class="text-danger small">{{ form.area.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label-modern">City</label>
+                                        {{ form.city }}
+                                        {% if form.city.errors %}
+                                        <div class="text-danger small">{{ form.city.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label-modern">Landmark</label>
+                                        {{ form.landmark }}
+                                        {% if form.landmark.errors %}
+                                        <div class="text-danger small">{{ form.landmark.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 5: Additional Notes -->
+                        <div class="mb-5">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="icon-box icon-box-green me-3" style="width: 50px; height: 50px; font-size: 1.3rem;">
+                                    <i class="bi bi-chat-text-fill"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0 fw-semibold">Additional Notes</h5>
+                                    <small class="text-muted">Optional additional information</small>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form.additional_notes }}
+                                {% if form.additional_notes.errors %}
+                                <div class="text-danger small">{{ form.additional_notes.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Buttons -->
+                        <div class="d-grid gap-3">
+                            <button type="submit" class="btn btn-modern btn-modern-primary btn-modern-lg">
+                                <i class="bi bi-check-circle-fill me-2"></i>Submit Report
+                            </button>
+                            <a href="{% url 'waste_report_list' %}" class="btn btn-modern btn-modern-secondary">
+                                <i class="bi bi-x-circle me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control-modern,
+    .form-select {
+        padding: 12px 16px;
+        border-radius: var(--radius-md);
+        border: 2px solid var(--border-color);
+        background: var(--bg-white);
+        transition: all var(--transition-fast);
+    }
+    
+    .form-control-modern:focus,
+    .form-select:focus {
+        outline: none;
+        border-color: var(--primary-green);
+        box-shadow: 0 0 0 4px rgba(46, 204, 113, 0.1);
+    }
+    
+    textarea.form-control {
+        min-height: 120px;
+    }
+</style>
+
+<script>
+// Camera button handler
+document.getElementById('camera_btn').addEventListener('click', function() {
+    const fileInput = document.getElementById('waste_image');
+    fileInput.setAttribute('capture', 'environment');
+    fileInput.click();
+});
+
+// Image upload and AI classification
+document.getElementById('waste_image').addEventListener('change', async function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Show preview
+    const preview = document.getElementById('imagePreview');
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        preview.innerHTML = `
+            <div class="modern-card p-3 text-center">
+                <img src="${event.target.result}" class="img-fluid rounded" style="max-height: 300px;">
+            </div>
+        `;
+    }
+    reader.readAsDataURL(file);
+    
+    // Show AI processing
+    document.getElementById('aiProcessing').style.display = 'block';
+    document.getElementById('aiResults').style.display = 'none';
+    document.getElementById('weightSection').style.display = 'none';
+    
+    // Call AI API
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    try {
+        const response = await fetch('{% url "classify_waste_api" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        });
+        
+        const result = await response.json();
+        
+        // Hide processing
+        document.getElementById('aiProcessing').style.display = 'none';
+        
+        if (result.success) {
+            // Show results
+            document.getElementById('aiResults').style.display = 'block';
+            document.getElementById('weightSection').style.display = 'block';
+            
+            // Populate fields
+            document.getElementById('aiDescription').textContent = result.classification.description || 'Waste detected';
+            document.getElementById('aiWeight').textContent = result.classification.weight_estimate || '0';
+            
+            // Set waste type
+            const wasteTypeSelect = document.getElementById('id_waste_type');
+            const typeMap = {
+                'plastic': 'plastic',
+                'paper': 'paper',
+                'metal': 'metal',
+                'glass': 'glass',
+                'organic': 'organic',
+                'electronic': 'electronic'
+            };
+            wasteTypeSelect.value = typeMap[result.classification.waste_type] || '';
+            
+            // Materials
+            if (result.classification.materials) {
+                document.getElementById('materialsList').innerHTML = result.classification.materials.map(m => 
+                    `<span class="badge bg-primary me-2 mb-2">${m}</span>`
+                ).join('');
+            }
+            
+            // Pre-fill weight
+            document.getElementById('id_exact_quantity').value = result.classification.weight_estimate || '';
+        } else {
+            alert('AI classification failed. Please fill details manually.');
+            document.getElementById('aiResults').style.display = 'block';
+            document.getElementById('weightSection').style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('aiProcessing').style.display = 'none';
+        alert('Error processing image. Please try again.');
+    }
+});
+
+// GPS Location
+document.getElementById('location_auto').addEventListener('change', function() {
+    if (this.checked) {
+        if (navigator.geolocation) {
+            document.getElementById('gps_status').innerHTML = '<div class="spinner-border spinner-border-sm me-2"></div>Getting location...';
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    document.getElementById('id_latitude').value = position.coords.latitude.toFixed(5);
+                    document.getElementById('id_longitude').value = position.coords.longitude.toFixed(5);
+                    document.getElementById('gps_status').innerHTML = 
+                        '<span class="text-success"><i class="bi bi-check-circle-fill me-2"></i>Location captured!</span>';
+                },
+                function(error) {
+                    document.getElementById('gps_status').innerHTML = 
+                        '<span class="text-danger"><i class="bi bi-x-circle-fill me-2"></i>Failed to get location</span>';
+                }
+            );
+        }
+    }
+});
+</script>
+{% endblock %}

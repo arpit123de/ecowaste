@@ -1,0 +1,99 @@
+{% extends 'mainapp/base.html' %}
+{% load static %}
+
+{% block title %}Browse Buyers - Waste Management{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-shop"></i> Browse Waste Buyers</h2>
+    </div>
+
+    {% if buyers %}
+        <div class="row g-4">
+            {% for buyer in buyers %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm hover-card">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="bi bi-shop text-primary"></i> {{ buyer.shop_name }}
+                            </h5>
+                            <p class="text-muted mb-2">
+                                <i class="bi bi-tag"></i> {{ buyer.shop_type }}
+                            </p>
+                            
+                            <div class="mb-3">
+                                <strong><i class="bi bi-recycle"></i> Handles:</strong>
+                                <div class="mt-1">
+                                    {% for category in buyer.waste_categories_handled %}
+                                        <span class="badge bg-success me-1">{{ category }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <i class="bi bi-geo-alt"></i>
+                                <strong>Location:</strong><br>
+                                {{ buyer.address }}<br>
+                                {{ buyer.city }}, {{ buyer.state }} - {{ buyer.pincode }}
+                            </div>
+
+                            <div class="mb-3">
+                                <i class="bi bi-telephone"></i>
+                                <strong>Contact:</strong> {{ buyer.mobile_number }}
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="text-warning me-2">
+                                        {% if buyer.average_rating > 0 %}
+                                            {% for i in "12345" %}
+                                                {% if forloop.counter <= buyer.average_rating %}
+                                                    <i class="bi bi-star-fill"></i>
+                                                {% else %}
+                                                    <i class="bi bi-star"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% else %}
+                                            <i class="bi bi-star"></i>
+                                            <i class="bi bi-star"></i>
+                                            <i class="bi bi-star"></i>
+                                            <i class="bi bi-star"></i>
+                                            <i class="bi bi-star"></i>
+                                        {% endif %}
+                                    </div>
+                                    <span class="text-muted">
+                                        {% if buyer.average_rating > 0 %}
+                                            {{ buyer.average_rating }} ({{ buyer.total_ratings }} review{{ buyer.total_ratings|pluralize }})
+                                        {% else %}
+                                            No ratings yet
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <a href="{% url 'buyer_profile_public' buyer.pk %}" class="btn btn-primary w-100">
+                                <i class="bi bi-eye"></i> View Profile
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> No buyers available at the moment.
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .hover-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .hover-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2) !important;
+    }
+</style>
+{% endblock %}

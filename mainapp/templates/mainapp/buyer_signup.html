@@ -1,0 +1,164 @@
+{% extends 'mainapp/base.html' %}
+
+{% block title %}Buyer Registration{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow-lg">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0"><i class="bi bi-shop"></i> Buyer Registration</h3>
+                <p class="mb-0 small">Register your waste collection business</p>
+            </div>
+            <div class="card-body">
+                {% if form.errors %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <h5 class="alert-heading">⚠️ Please fix the following errors:</h5>
+                        <ul class="mb-0">
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                    <li><strong>{{ field }}:</strong> {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endif %}
+
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <!-- Personal Details -->
+                    <div class="section-header mb-3">
+                        <h5 class="text-primary"><i class="bi bi-person"></i> Personal Details</h5>
+                        <hr>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                            {{ form.full_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Mobile Number <span class="text-danger">*</span></label>
+                            {{ form.mobile_number }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Email <span class="text-danger">*</span></label>
+                        {{ form.email }}
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Username <span class="text-danger">*</span></label>
+                            {{ form.username }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Password <span class="text-danger">*</span></label>
+                            {{ form.password1 }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                            {{ form.password2 }}
+                        </div>
+                    </div>
+
+                    <!-- Business Details -->
+                    <div class="section-header mb-3 mt-4">
+                        <h5 class="text-primary"><i class="bi bi-building"></i> Business Details</h5>
+                        <hr>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Shop Name <span class="text-danger">*</span></label>
+                            {{ form.shop_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Shop Type <span class="text-danger">*</span></label>
+                            {{ form.shop_type }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Waste Categories Handled <span class="text-danger">*</span></label>
+                        <div class="border rounded p-3 bg-light">
+                            {% for choice in form.waste_categories_handled %}
+                                <div class="form-check">
+                                    {{ choice }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Shop Address <span class="text-danger">*</span></label>
+                        {{ form.shop_address }}
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Shop Photo <span class="text-muted">(Optional)</span></label>
+                        {{ form.shop_photo }}
+                        <div class="form-text">Upload a photo of your shop/business premises (Max 5MB)</div>
+                    </div>
+
+                    <!-- Verification Details -->
+                    <div class="section-header mb-3 mt-4">
+                        <h5 class="text-primary"><i class="bi bi-shield-check"></i> Verification Details</h5>
+                        <hr>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> <strong>Privacy Notice:</strong> Your Aadhaar number will be encrypted and stored securely. Only the last 4 digits will be visible in your profile.
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Aadhaar Number <span class="text-danger">*</span></label>
+                            {{ form.aadhaar_number }}
+                            <div class="form-text">12-digit Aadhaar number</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Trade License / Business Registration <span class=\"text-muted\">(Optional)</span></label>
+                        {{ form.trade_license }}
+                        <div class="form-text">Upload your trade license or business registration document (PDF, JPG, PNG - Max 10MB)</div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-circle"></i> Register as Buyer
+                        </button>
+                        <a href="{% url 'signup_choice' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Back
+                        </a>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <p class="text-muted">
+                            Already have an account? 
+                            <a href="{% url 'login' %}" class="text-decoration-none">Login here</a>
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.section-header h5 {
+    font-weight: 600;
+}
+.form-check {
+    padding-left: 1.5em;
+}
+</style>
+{% endblock %}

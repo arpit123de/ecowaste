@@ -1,0 +1,103 @@
+{% extends 'mainapp/base.html' %}
+
+{% block title %}Waste Report Details{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="mb-3">
+            <a href="{% url 'waste_report_list' %}" class="btn btn-outline-secondary">← Back to Reports</a>
+        </div>
+        
+        <div class="card shadow-lg">
+            <div class="card-header bg-success text-white">
+                <h3 class="mb-0">✅ Waste Report Submitted Successfully!</h3>
+                <p class="mb-0 small mt-2">Your report has been recorded and is pending review</p>
+            </div>
+            
+            {% if report.image %}
+            <img src="{{ report.image.url }}" class="card-img-top" alt="{{ report.get_waste_type_display }}" style="max-height: 400px; object-fit: contain; background: #f8f9fa;">
+            {% endif %}
+            
+            <div class="card-body">
+                <!-- Status Badge -->
+                <div class="mb-3">
+                    <span class="badge 
+                        {% if report.status == 'collected' %}bg-success
+                        {% elif report.status == 'assigned' %}bg-info
+                        {% else %}bg-warning text-dark{% endif %}" 
+                        style="font-size: 1rem; padding: 0.5rem 1rem;">
+                        {{ report.get_status_display }}
+                    </span>
+                </div>
+                
+                <!-- User Information -->
+                <div class="mb-4">
+                    <h5 class="text-primary">👤 Reporter Information</h5>
+                    <hr>
+                    <p><strong>Name:</strong> {{ report.name|default:"Not provided" }}</p>
+                    <p><strong>Mobile:</strong> {{ report.mobile_number|default:"Not provided" }}</p>
+                    <p><strong>Email:</strong> {{ report.email|default:"Not provided" }}</p>
+                </div>
+                
+                <!-- Waste Details -->
+                <div class="mb-4">
+                    <h5 class="text-primary">🗑️ Waste Details</h5>
+                    <hr>
+                    <p><strong>Waste Type:</strong> {{ report.get_waste_type_display }}</p>
+                    {% if report.waste_type_other %}
+                    <p><strong>Specified Type:</strong> {{ report.waste_type_other }}</p>
+                    {% endif %}
+                    <p><strong>Quantity:</strong> {{ report.quantity_display }}</p>
+                    {% if report.waste_condition %}
+                    <p><strong>Condition:</strong> {{ report.get_waste_condition_display }}</p>
+                    {% endif %}
+                </div>
+                
+                <!-- Location -->
+                <div class="mb-4">
+                    <h5 class="text-primary">📍 Location</h5>
+                    <hr>
+                    {% if report.location_auto and report.latitude and report.longitude %}
+                    <p><strong>GPS Coordinates:</strong><br>
+                        Latitude: {{ report.latitude }}<br>
+                        Longitude: {{ report.longitude }}
+                    </p>
+                    <a href="https://www.google.com/maps?q={{ report.latitude }},{{ report.longitude }}" 
+                       target="_blank" class="btn btn-sm btn-outline-primary">
+                        View on Google Maps
+                    </a>
+                    {% else %}
+                    <p><strong>Area:</strong> {{ report.area|default:"Not provided" }}</p>
+                    <p><strong>City:</strong> {{ report.city|default:"Not provided" }}</p>
+                    <p><strong>Landmark:</strong> {{ report.landmark|default:"Not provided" }}</p>
+                    {% endif %}
+                </div>
+                
+                <!-- Additional Notes -->
+                {% if report.additional_notes %}
+                <div class="mb-4">
+                    <h5 class="text-primary">📝 Additional Notes</h5>
+                    <hr>
+                    <p>{{ report.additional_notes }}</p>
+                </div>
+                {% endif %}
+                
+                <!-- Timestamps -->
+                <div class="mb-4">
+                    <h5 class="text-primary">🕒 Timeline</h5>
+                    <hr>
+                    <p><strong>Reported:</strong> {{ report.created_at|date:"F d, Y g:i A" }}</p>
+                    <p><strong>Last Updated:</strong> {{ report.updated_at|date:"F d, Y g:i A" }}</p>
+                </div>
+                
+                <!-- Actions -->
+                <div class="d-flex gap-2">
+                    <a href="{% url 'waste_report_list' %}" class="btn btn-primary">Back to List</a>
+                    <a href="{% url 'waste_report_delete' report.pk %}" class="btn btn-danger">Delete Report</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

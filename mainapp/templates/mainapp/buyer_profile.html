@@ -1,0 +1,179 @@
+{% extends 'mainapp/base.html' %}
+
+{% block title %}Buyer Profile{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow-lg">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0"><i class="bi bi-person-circle"></i> Buyer Profile</h3>
+                <p class="mb-0 small">{{ buyer.shop_name }}</p>
+            </div>
+            <div class="card-body">
+                <!-- Personal Details -->
+                <div class="section-header mb-3">
+                    <h5 class="text-primary"><i class="bi bi-person"></i> Personal Details</h5>
+                    <hr>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="info-box p-3 bg-light rounded">
+                            <label class="text-muted small">Full Name</label>
+                            <p class="mb-0 fw-bold">{{ buyer.full_name }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-box p-3 bg-light rounded">
+                            <label class="text-muted small">Mobile Number</label>
+                            <p class="mb-0 fw-bold">{{ buyer.mobile_number }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="info-box p-3 bg-light rounded">
+                            <label class="text-muted small">Email</label>
+                            <p class="mb-0 fw-bold">{{ buyer.user.email }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-box p-3 bg-light rounded">
+                            <label class="text-muted small">Username</label>
+                            <p class="mb-0 fw-bold">{{ buyer.user.username }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Business Details -->
+                <div class="section-header mb-3 mt-4">
+                    <h5 class="text-primary"><i class="bi bi-building"></i> Business Details</h5>
+                    <hr>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="info-box p-3 bg-light rounded">
+                            <label class="text-muted small">Shop Name</label>
+                            <p class="mb-0 fw-bold">{{ buyer.shop_name }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-box p-3 bg-light rounded">
+                            <label class="text-muted small">Shop Type</label>
+                            <p class="mb-0 fw-bold">{{ buyer.get_shop_type_display }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="info-box p-3 bg-light rounded">
+                        <label class="text-muted small">Waste Categories Handled</label>
+                        <p class="mb-0">
+                            {% for category in buyer.waste_categories_handled %}
+                                <span class="badge bg-success me-1">{{ category|title }}</span>
+                            {% endfor %}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="info-box p-3 bg-light rounded">
+                        <label class="text-muted small">Shop Address</label>
+                        <p class="mb-0 fw-bold">{{ buyer.shop_address }}</p>
+                    </div>
+                </div>
+
+                {% if buyer.shop_photo %}
+                <div class="mb-4">
+                    <label class="text-muted small">Shop Photo</label>
+                    <div class="mt-2">
+                        <img src="{{ buyer.shop_photo.url }}" alt="Shop Photo" class="img-thumbnail" style="max-width: 300px;">
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Verification Details -->
+                <div class="section-header mb-3 mt-4">
+                    <h5 class="text-primary"><i class="bi bi-shield-check"></i> Verification Details</h5>
+                    <hr>
+                </div>
+
+                <div class="alert alert-info mb-3">
+                    <i class="bi bi-lock-fill"></i> <strong>Security:</strong> Your Aadhaar number is encrypted and secure. Only the last 4 digits are displayed.
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="info-box p-3 bg-light rounded">
+                            <label class="text-muted small">Aadhaar Number</label>
+                            <p class="mb-0 fw-bold">{{ buyer.masked_aadhaar }}</p>
+                        </div>
+                    </div>
+                    {% if buyer.trade_license %}
+                    <div class="col-md-6">
+                        <div class="info-box p-3 bg-light rounded">
+                            <label class="text-muted small">Trade License</label>
+                            <p class="mb-0">
+                                <a href="{{ buyer.trade_license.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-file-earmark-pdf"></i> View Document
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="col-md-6">
+                        <div class="info-box p-3 bg-light rounded">
+                            <label class="text-muted small">Trade License</label>
+                            <p class="mb-0 text-muted"><em>Not uploaded</em></p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Account Info -->
+                <div class="section-header mb-3 mt-4">
+                    <h5 class="text-primary"><i class="bi bi-info-circle"></i> Account Information</h5>
+                    <hr>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="info-box p-3 bg-light rounded">
+                            <label class="text-muted small">Member Since</label>
+                            <p class="mb-0 fw-bold">{{ buyer.created_at|date:"F d, Y" }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-box p-3 bg-light rounded">
+                            <label class="text-muted small">Last Updated</label>
+                            <p class="mb-0 fw-bold">{{ buyer.updated_at|date:"F d, Y" }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="d-grid gap-2 mt-4">
+                    <a href="{% url 'buyer_dashboard' %}" class="btn btn-primary">
+                        <i class="bi bi-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.section-header h5 {
+    font-weight: 600;
+}
+.info-box {
+    transition: background-color 0.3s;
+}
+.info-box:hover {
+    background-color: #e9ecef !important;
+}
+</style>
+{% endblock %}

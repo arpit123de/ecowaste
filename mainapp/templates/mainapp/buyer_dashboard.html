@@ -1,0 +1,127 @@
+{% extends 'mainapp/buyer_base.html' %}
+
+{% block title %}Buyer Dashboard{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section gradient-teal text-white mb-4 fade-in">
+    <div class="hero-content text-center">
+        <h1 class="mb-2">
+            <i class="bi bi-shop"></i> Welcome back, {{ buyer.full_name }}!
+        </h1>
+        <p class="mb-0 fs-5 fw-medium">{{ buyer.get_shop_type_display }}</p>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="stats-card modern-card hover-lift fade-in">
+            <div class="icon-box icon-box-blue mb-3">
+                <i class="bi bi-inbox-fill"></i>
+            </div>
+            <div class="stats-number text-gradient-blue">{{ total_requests }}</div>
+            <div class="stats-label">Total Requests</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="stats-card modern-card hover-lift fade-in delay-1">
+            <div class="icon-box icon-box-orange mb-3">
+                <i class="bi bi-hourglass-split"></i>
+            </div>
+            <div class="stats-number text-gradient-orange">{{ pending_requests }}</div>
+            <div class="stats-label">Pending</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="stats-card modern-card hover-lift fade-in delay-2">
+            <div class="icon-box icon-box-green mb-3">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div class="stats-number text-gradient-green">{{ accepted_requests }}</div>
+            <div class="stats-label">Accepted</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="stats-card modern-card hover-lift fade-in delay-3">
+            <div class="icon-box icon-box-purple mb-3">
+                <i class="bi bi-bag-check-fill"></i>
+            </div>
+            <div class="stats-number text-gradient-purple">{{ completed_requests }}</div>
+            <div class="stats-label">Completed</div>
+        </div>
+    </div>
+</div>
+
+<!-- Available Waste Listings -->
+<div class="modern-card mb-4 slide-in-left">
+    <div class="modern-card-header d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">
+            <i class="bi bi-collection me-2"></i>Available Waste Listings
+        </h4>
+        <a href="{% url 'buyer_requests' %}" class="btn btn-modern btn-modern-primary">
+            View All <i class="bi bi-arrow-right ms-2"></i>
+        </a>
+    </div>
+    <div class="modern-card-body">
+        {% if available_listings %}
+        <div class="row g-4">
+            {% for report in available_listings %}
+            <div class="col-md-4">
+                <div class="modern-card hover-lift h-100">
+                    {% if report.image %}
+                    <img src="{{ report.image.url }}" class="card-img-top" style="height: 200px; object-fit: cover; border-radius: 12px 12px 0 0;">
+                    {% else %}
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px; border-radius: 12px 12px 0 0;">
+                        <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="p-3">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="mb-0">{{ report.get_waste_type_display }}</h5>
+                            <span class="status-badge status-badge-success">New</span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-box-seam text-primary me-2"></i>
+                                <span class="small"><strong>Quantity:</strong> {{ report.quantity_display }}</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-info-circle text-success me-2"></i>
+                                <span class="small"><strong>Condition:</strong> {{ report.get_waste_condition_display }}</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-geo-alt text-danger me-2"></i>
+                                <span class="small"><strong>Location:</strong> {{ report.city|default:"Not specified" }}</span>
+                            </div>
+                            <div class="d-flex align-items-center text-muted">
+                                <i class="bi bi-clock me-2"></i>
+                                <small>Posted {{ report.created_at|timesince }} ago</small>
+                            </div>
+                        </div>
+                        
+                        <a href="{% url 'waste_detail_for_buyer' report.pk %}" class="btn btn-modern btn-modern-primary w-100">
+                            <i class="bi bi-eye me-2"></i>View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <div class="icon-box icon-box-green mx-auto mb-3" style="width: 80px; height: 80px; opacity: 0.3;">
+                <i class="bi bi-inbox" style="font-size: 2.5rem;"></i>
+            </div>
+            <p class="text-muted mt-3 fs-5">No available waste listings at the moment</p>
+            <p class="text-muted">Check back soon for new opportunities</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

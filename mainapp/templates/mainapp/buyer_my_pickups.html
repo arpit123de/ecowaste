@@ -1,0 +1,75 @@
+{% extends 'mainapp/buyer_base.html' %}
+
+{% block title %}My Pickups{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h2 class="fw-bold">My Pickup Requests</h2>
+    <p class="text-muted">Track all your waste pickup requests</p>
+</div>
+
+{% if pickups %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Waste Type</th>
+                        <th>User</th>
+                        <th>Quantity</th>
+                        <th>Offered Price</th>
+                        <th>Status</th>
+                        <th>Scheduled Time</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pickup in pickups %}
+                    <tr>
+                        <td>
+                            <strong>{{ pickup.waste_report.get_waste_type_display }}</strong>
+                        </td>
+                        <td>{{ pickup.user.username }}</td>
+                        <td>{{ pickup.waste_report.quantity_display }}</td>
+                        <td class="fw-bold text-success">₹{{ pickup.offered_price }}</td>
+                        <td>
+                            <span class="badge bg-{% if pickup.status == 'accepted' or pickup.status == 'scheduled' %}success{% elif pickup.status == 'rejected' %}danger{% elif pickup.status == 'completed' %}info{% else %}warning{% endif %}">
+                                {{ pickup.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if pickup.confirmed_pickup_time %}
+                                <i class="bi bi-calendar-check text-success"></i>
+                                {{ pickup.confirmed_pickup_time|date:"M d, g:i A" }}
+                            {% else %}
+                                <span class="text-muted">Not scheduled</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ pickup.created_at|date:"M d, Y" }}</td>
+                        <td>
+                            <a href="{% url 'waste_detail_for_buyer' pickup.waste_report.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="card shadow-sm">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-truck" style="font-size: 5rem; color: #ccc;"></i>
+        <h4 class="mt-4">No Pickup Requests Yet</h4>
+        <p class="text-muted">Start by browsing available waste listings</p>
+        <a href="{% url 'buyer_requests' %}" class="btn btn-primary mt-3">
+            <i class="bi bi-inbox"></i> Browse Listings
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

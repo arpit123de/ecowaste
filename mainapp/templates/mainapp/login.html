@@ -1,0 +1,59 @@
+{% extends 'mainapp/base.html' %}
+
+{% block title %}Login - EcoWaste{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="col-md-5 col-lg-4">
+        <div class="glass-card p-5 fade-in">
+            <div class="text-center mb-4">
+                <div class="icon-box icon-box-green mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2.5rem;">
+                    <i class="bi bi-recycle"></i>
+                </div>
+                <h2 class="mb-2">Welcome Back!</h2>
+                <p class="text-muted">Login to continue managing waste</p>
+            </div>
+            
+            <form method="post" class="form-modern">
+                {% csrf_token %}
+                
+                <div class="mb-4">
+                    <label for="id_username" class="form-label-modern">
+                        <i class="bi bi-person me-2"></i>Username
+                    </label>
+                    <input type="text" name="username" class="form-control form-control-modern" 
+                           id="id_username" placeholder="Enter your username" required autofocus>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="id_password" class="form-label-modern">
+                        <i class="bi bi-lock me-2"></i>Password
+                    </label>
+                    <input type="password" name="password" class="form-control form-control-modern" 
+                           id="id_password" placeholder="Enter your password" required>
+                </div>
+                
+                {% if form.errors %}
+                <div class="alert alert-danger border-0 d-flex align-items-center" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <div>Invalid username or password. Please try again.</div>
+                </div>
+                {% endif %}
+                
+                <button type="submit" class="btn btn-modern btn-modern-primary w-100 btn-modern-lg mt-3">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                </button>
+            </form>
+            
+            <div class="text-center mt-4">
+                <p class="text-muted small mb-0">
+                    Don't have an account? 
+                    <a href="{% url 'signup_choice' %}" class="text-decoration-none fw-semibold" style="color: var(--primary-green);">
+                        Sign up here
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,375 @@
+{% extends 'mainapp/base.html' %}
+
+{% block title %}Report Waste{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-lg">
+            <div class="card-header bg-success text-white">
+                <h3 class="mb-0">♻️ Report Waste</h3>
+                <p class="mb-0 small">Help us keep the environment clean by reporting waste</p>
+            </div>
+            <div class="card-body">
+                {% if form.errors %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <h5 class="alert-heading">⚠️ Please fix the following errors:</h5>
+                        <ul class="mb-0">
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                    <li><strong>{{ field }}:</strong> {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endif %}
+                
+                <form method="post" enctype="multipart/form-data" id="wasteReportForm">
+                    {% csrf_token %}
+                    
+                    <!-- Photo Upload FIRST -->
+                    <div class="section-header mb-3">
+                        <h5 class="text-primary">📸 Step 1: Take Photo</h5>
+                        <hr>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Waste Photo <span class="text-danger">*</span></label>
+                        
+                        <!-- Hidden file input using Django form field -->
+                        <div style="display: none;">
+                            {{ form.image }}
+                        </div>
+                        
+                        <!-- Camera button -->
+                        <div class="d-grid mb-3">
+                            <button type="button" class="btn btn-success btn-lg" id="camera_btn">
+                                <i class="bi bi-camera-fill"></i> Take Photo with Camera
+                            </button>
+                        </div>
+                        
+                        <div class="form-text">Max 5MB. JPG/PNG only. AI will auto-detect waste details.</div>
+                        {% if form.image.errors %}
+                            <div class="text-danger small">{{ form.image.errors }}</div>
+                        {% endif %}
+                        
+                        <!-- AI Processing Status -->
+                        <div id="aiProcessing" style="display: none;" class="mt-3">
+                            <div class="alert alert-info">
+                                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                <strong>AI is analyzing your photo...</strong>
+                            </div>
+                        </div>
+                        
+                        <!-- Image preview and AI results -->
+                        <div id="imagePreview" class="mt-3"></div>
+                    </div>
+                    
+                    <!-- AI Detected Waste Details (Auto-populated) -->
+                    <div id="aiResults" style="display: none;">
+                        <div class="section-header mb-3 mt-4">
+                            <h5 class="text-success">🤖 Step 2: AI Detected Details</h5>
+                            <hr>
+                        </div>
+                        
+                        <div class="alert alert-success mb-3">
+                            <i class="bi bi-check-circle-fill"></i> <strong>Waste identified!</strong>
+                            <p class="mb-0 mt-2" id="aiDescription"></p>
+                        </div>
+                        
+                        <!-- Hidden fields for detected data -->
+                        <input type="hidden" id="detectedWasteType" name="detected_waste_type">
+                        <input type="hidden" id="detectedMaterials" name="detected_materials">
+                        <input type="hidden" id="detectedConfidence" name="detected_confidence">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Waste Type <small class="text-muted">(Auto-detected)</small></label>
+                            {{ form.waste_type }}
+                            <div class="form-text">You can change this if the AI made a mistake</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Materials Detected</label>
+                            <div id="materialsList" class="border rounded p-3 bg-light"></div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Waste Condition <small class="text-muted">(Auto-detected)</small></label>
+                            {{ form.waste_condition }}
+                        </div>
+                    </div>
+                    
+                    <!-- Weight Input -->
+                    <div id="weightSection" style="display: none;">
+                        <div class="section-header mb-3 mt-4">
+                            <h5 class="text-primary">⚖️ Step 3: Confirm Weight</h5>
+                            <hr>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Estimated Weight (kg) <span class="text-danger">*</span></label>
+                                {{ form.exact_quantity }}
+                                <div class="form-text">AI estimated: <span id="aiWeight">-</span> kg</div>
+                                {% if form.exact_quantity.errors %}
+                                    <div class="text-danger small">{{ form.exact_quantity.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Quantity Type</label>
+                                {{ form.quantity_type }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- User Information (Hidden - Auto-filled) -->
+                    <div style="display: none;">
+                        {{ form.name }}
+                        {{ form.mobile_number }}
+                        {{ form.email }}
+                        {{ form.waste_type_other }}
+                    </div>
+                    
+                    <!-- Location -->
+                    <div class="section-header mb-3 mt-4">
+                        <h5 class="text-primary">📍 Location Details</h5>
+                        <hr>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.location_auto }}
+                            <label class="form-check-label" for="location_auto">
+                                Use my current location (GPS)
+                            </label>
+                        </div>
+                        <div id="gps_status" class="mt-2"></div>
+                    </div>
+                    
+                    {{ form.latitude }}
+                    {{ form.longitude }}
+                    
+                    <div id="manual_location">
+                        <div class="mb-3">
+                            <label class="form-label">Area / Street Name</label>
+                            {{ form.area }}
+                            {% if form.area.errors %}
+                                <div class="text-danger small">{{ form.area.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">City</label>
+                                {{ form.city }}
+                                {% if form.city.errors %}
+                                    <div class="text-danger small">{{ form.city.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Landmark</label>
+                                {{ form.landmark }}
+                                {% if form.landmark.errors %}
+                                    <div class="text-danger small">{{ form.landmark.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Notes -->
+                    <div class="section-header mb-3 mt-4">
+                        <h5 class="text-primary">📝 Additional Notes</h5>
+                        <hr>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Description <span class="text-muted">(Optional)</span></label>
+                        {{ form.additional_notes }}
+                        {% if form.additional_notes.errors %}
+                            <div class="text-danger small">{{ form.additional_notes.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            ✅ Submit Report
+                        </button>
+                        <a href="{% url 'waste_report_list' %}" class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Camera button click handler
+document.getElementById('camera_btn').addEventListener('click', function() {
+    const fileInput = document.getElementById('waste_image');
+    fileInput.setAttribute('capture', 'environment');
+    fileInput.click();
+});
+
+// Image upload and AI classification
+document.getElementById('waste_image').addEventListener('change', async function(e) {
+    const file = e.target.files[0];
+    
+    if (!file) return;
+    
+    // Show image preview
+    const preview = document.getElementById('imagePreview');
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        preview.innerHTML = '<img src="' + event.target.result + '" class="img-thumbnail" style="max-width: 100%; max-height: 300px;">';
+    }
+    reader.readAsDataURL(file);
+    
+    // Show AI processing indicator
+    document.getElementById('aiProcessing').style.display = 'block';
+    document.getElementById('aiResults').style.display = 'none';
+    document.getElementById('weightSection').style.display = 'none';
+    
+    // Call AI classification API
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    try {
+        const response = await fetch('{% url "classify_waste_api" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        });
+        
+        const result = await response.json();
+        
+        console.log('AI Classification Result:', result);
+        
+        // Hide processing indicator
+        document.getElementById('aiProcessing').style.display = 'none';
+        
+        if (result.success && result.data) {
+            const data = result.data;
+            
+            console.log('AI Data:', data);
+            
+            // Show AI results section
+            document.getElementById('aiResults').style.display = 'block';
+            document.getElementById('weightSection').style.display = 'block';
+            
+            // Display description
+            document.getElementById('aiDescription').textContent = data.description || 'Waste detected and analyzed.';
+            
+            // Set waste type
+            if (data.waste_type) {
+                document.getElementById('waste_type').value = data.waste_type;
+            }
+            
+            // Set waste condition (default to 'mixed')
+            document.getElementById('id_waste_condition').value = data.waste_category === 'mixed' ? 'mixed' : 'clean';
+            
+            // Display materials with individual weights
+            if (data.materials_detected && data.materials_detected.length > 0) {
+                let materialsHTML = '<table class="table table-sm mb-0">';
+                materialsHTML += '<thead><tr><th>Material</th><th>Type</th><th>Weight (kg)</th></tr></thead>';
+                materialsHTML += '<tbody>';
+                
+                data.materials_detected.forEach(function(item) {
+                    const badge = item.recyclable ? '<span class="badge bg-success">Recyclable</span>' : '<span class="badge bg-warning">Non-recyclable</span>';
+                    const weight = item.estimated_weight_kg ? item.estimated_weight_kg.toFixed(2) : '-';
+                    
+                    materialsHTML += '<tr>';
+                    materialsHTML += '<td><strong>' + item.material.replace(/_/g, ' ').toUpperCase() + '</strong></td>';
+                    materialsHTML += '<td>' + badge + '</td>';
+                    materialsHTML += '<td><span class="badge bg-info">' + weight + ' kg</span></td>';
+                    materialsHTML += '</tr>';
+                });
+                
+                materialsHTML += '</tbody></table>';
+                document.getElementById('materialsList').innerHTML = materialsHTML;
+                
+                // Store materials JSON
+                document.getElementById('detectedMaterials').value = JSON.stringify(data.materials_detected);
+            }
+            
+            // Set weight
+            if (data.estimated_weight_kg) {
+                document.getElementById('id_exact_quantity').value = data.estimated_weight_kg;
+                document.getElementById('aiWeight').textContent = data.estimated_weight_kg;
+            }
+            
+            // Set confidence
+            document.getElementById('detectedConfidence').value = data.confidence || 0;
+            
+            // Auto-enable GPS
+            const locationCheckbox = document.getElementById('location_auto');
+            if (!locationCheckbox.checked) {
+                locationCheckbox.checked = true;
+                locationCheckbox.dispatchEvent(new Event('change'));
+            }
+            
+        } else {
+            console.error('AI Classification Failed:', result);
+            alert('AI classification failed: ' + (result.error || 'Unknown error. Check console for details.'));
+            document.getElementById('aiResults').style.display = 'none';
+        }
+        
+    } catch (error) {
+        console.error('Error during AI classification:', error);
+        document.getElementById('aiProcessing').style.display = 'none';
+        alert('Error connecting to AI service: ' + error.message);
+    }
+});
+
+// GPS Location
+document.getElementById('location_auto').addEventListener('change', function() {
+    const manualLocation = document.getElementById('manual_location');
+    const gpsStatus = document.getElementById('gps_status');
+    
+    if (this.checked) {
+        manualLocation.style.display = 'none';
+        gpsStatus.innerHTML = '<div class="alert alert-info"><i class="bi bi-hourglass-split"></i> Getting your location...</div>';
+        
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    document.querySelector('input[name="latitude"]').value = position.coords.latitude.toFixed(5);
+                    document.querySelector('input[name="longitude"]').value = position.coords.longitude.toFixed(5);
+                    gpsStatus.innerHTML = '<div class="alert alert-success"><i class="bi bi-geo-alt-fill"></i> Location captured: ' + 
+                        position.coords.latitude.toFixed(5) + ', ' + 
+                        position.coords.longitude.toFixed(5) + '</div>';
+                },
+                function(error) {
+                    gpsStatus.innerHTML = '<div class="alert alert-danger"><i class="bi bi-exclamation-triangle-fill"></i> Could not get location. Error: ' + error.message + '. Please enter manually.</div>';
+                    document.getElementById('location_auto').checked = false;
+                    manualLocation.style.display = 'block';
+                }
+            );
+        } else {
+            gpsStatus.innerHTML = '<div class="alert alert-danger"><i class="bi bi-x-circle-fill"></i> GPS not supported by your browser.</div>';
+            this.checked = false;
+            manualLocation.style.display = 'block';
+        }
+    } else {
+        manualLocation.style.display = 'block';
+        gpsStatus.innerHTML = '';
+        document.querySelector('input[name="latitude"]').value = '';
+        document.querySelector('input[name="longitude"]').value = '';
+    }
+});
+</script>
+
+<style>
+.section-header h5 {
+    font-weight: 600;
+}
+.card-header {
+    padding: 1.5rem;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends 'mainapp/base.html' %}
+{% load static %}
+
+{% block title %}Pickup History{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-clock-history"></i> Pickup History</h2>
+    </div>
+
+    {% if history %}
+        <div class="row">
+            {% for record in history %}
+                <div class="col-md-6 mb-3">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="card-title mb-1">
+                                        <i class="bi bi-recycle text-success"></i> {{ record.waste_type }}
+                                    </h5>
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar3"></i> {{ record.completed_at|date:"F d, Y" }}
+                                    </small>
+                                </div>
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle"></i> Completed
+                                </span>
+                            </div>
+
+                            <div class="border-top pt-3">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Quantity</small>
+                                        <strong>{{ record.quantity }}</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Price Paid</small>
+                                        <strong class="text-success">₹{{ record.offered_price }}</strong>
+                                    </div>
+                                    <div class="col-12 mt-2">
+                                        <small class="text-muted d-block">Location</small>
+                                        <small><i class="bi bi-geo-alt"></i> {{ record.location }}</small>
+                                    </div>
+                                    <div class="col-6 mt-2">
+                                        <small class="text-muted d-block">
+                                            {% if user.buyer_profile %}User{% else %}Buyer{% endif %}
+                                        </small>
+                                        <strong>
+                                            {% if user.buyer_profile %}
+                                                {{ record.user_username }}
+                                            {% else %}
+                                                {{ record.buyer_shop_name }}
+                                            {% endif %}
+                                        </strong>
+                                    </div>
+                                    <div class="col-6 mt-2">
+                                        <small class="text-muted d-block">Reported</small>
+                                        <small>{{ record.reported_at|date:"M d, Y" }}</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="border-top mt-3 pt-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar-check"></i> 
+                                        Pickup: {{ record.scheduled_at|date:"M d, g:i A" }}
+                                    </small>
+                                    {% if record.pickup_request %}
+                                    <small class="text-success">
+                                        <i class="bi bi-check2-circle"></i> Verified
+                                    </small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination could go here if needed -->
+        <div class="text-center mt-4">
+            <small class="text-muted">Showing {{ history|length }} completed pickup{{ history|length|pluralize }}</small>
+        </div>
+    {% else %}
+        <div class="card shadow-sm">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-archive" style="font-size: 5rem; color: #ddd;"></i>
+                <h4 class="mt-4">No History Yet</h4>
+                <p class="text-muted">
+                    {% if user.buyer_profile %}
+                        Your completed pickups will appear here
+                    {% else %}
+                        Your completed waste reports will appear here
+                    {% endif %}
+                </p>
+                <a href="{% if user.buyer_profile %}{% url 'buyer_requests' %}{% else %}{% url 'waste_report_create' %}{% endif %}" 
+                   class="btn btn-primary mt-3">
+                    {% if user.buyer_profile %}
+                        <i class="bi bi-search"></i> Browse Waste
+                    {% else %}
+                        <i class="bi bi-plus-circle"></i> Report Waste
+                    {% endif %}
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
