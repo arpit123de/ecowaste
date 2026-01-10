@@ -9,6 +9,7 @@ from django.db.models import Avg
 from .models import Task, Note, WasteReport, Buyer, PickupRequest, BuyerRating, PickupHistory
 from .forms import TaskForm, NoteForm, WasteReportForm, SignUpForm, BuyerRegistrationForm
 from .waste_classifier import classify_waste_image
+
 import json
 
 def home(request):

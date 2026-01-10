@@ -1,23 +1,32 @@
 import os
 import json
 import requests
-from google import genai
+import google.generativeai as genai
 from dotenv import load_dotenv
 
-
+# Load environment variables
 load_dotenv()
 
-client = genai.Client(
-    api_key=os.environ.get("GEMINI_API_KEY"),
+# Configure Gemini (NO client object)
+genai.configure(
+    api_key=os.environ.get("GEMINI_API_KEY")
 )
 
-
-IMAGE_URL ="https://media.gettyimages.com/id/1138822598/photo/rubbish-in-bin-unsorted.jpg?s=612x612&w=gi&k=20&c=UghVMS01N3BpPO3mrzj3vDNKu9cUUK5MQZQbRa8b4GE="
-resp = requests.get(IMAGE_URL, timeout=20, headers={"User-Agent": "Mozilla/5.0"}, allow_redirects=True)
+# Download image
+IMAGE_URL = "https://media.gettyimages.com/id/1138822598/photo/rubbish-in-bin-unsorted.jpg?s=612x612&w=gi&k=20&c=UghVMS01N3BpPO3mrzj3vDNKu9cUUK5MQZQbRa8b4GE="
+resp = requests.get(
+    IMAGE_URL,
+    timeout=20,
+    headers={"User-Agent": "Mozilla/5.0"},
+)
 resp.raise_for_status()
+
 image_bytes = resp.content
 
-MODEL_NAME = "models/gemini-2.5-flash"
+# Gemini model (Python SDK format)
+MODEL_NAME = "gemini-2.5-flash"
+
+model = genai.GenerativeModel(MODEL_NAME)
 
 prompt = """
 You are an expert waste and recycling classification AI used in India.
@@ -59,31 +68,27 @@ Respond ONLY in valid JSON using this exact format:
   ],
   "confidence": number (0-100)
 }
-
 """
 
-
-response = client.models.generate_content(
-    model=MODEL_NAME,
-    contents=[
+# Generate response with image
+response = model.generate_content(
+    [
+        prompt,
         {
-            "role": "user",
-            "parts": [
-                {"text": prompt},
-                {"inline_data": {"mime_type": "image/jpeg", "data": image_bytes}},
-            ],
-        }
-    ],
+            "mime_type": "image/jpeg",
+            "data": image_bytes,
+        },
+    ]
 )
 
-
+# Clean response
 text = response.text.strip()
+
 if text.startswith("```"):
     text = text.replace("```json", "").replace("```", "").strip()
 
-
+# Parse JSON safely
 result = json.loads(text)
 
 print("Gemini Response:")
 print(json.dumps(result, indent=2))
-

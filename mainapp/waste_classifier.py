@@ -4,7 +4,7 @@ Waste Classification Utility using Google Gemini AI - Exact copy of working web 
 import os
 import json
 import base64
-from google import genai
+import google.generativeai as genai
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -33,14 +33,15 @@ def classify_waste_image(image_file):
             }
         
         # Initialize client (same as web version)
-        client = genai.Client(api_key=api_key)
+        genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
         
         # Read image bytes
         image_file.seek(0)
         image_bytes = image_file.read()
         
         # Use exact same model and prompt as web version
-        MODEL_NAME = "models/gemini-2.5-flash"
+        MODEL_NAME = "gemini-2.5-flash"
+        model = genai.GenerativeModel(MODEL_NAME)
         
         prompt = """
 You are an expert waste and recycling classification AI used in India.
@@ -101,17 +102,14 @@ Respond ONLY in valid JSON using this exact format:
 """
 
         # Call Gemini API with exact same structure as web version
-        response = client.models.generate_content(
-            model=MODEL_NAME,
-            contents=[
+        response = model.generate_content(
+            [
+                prompt,
                 {
-                    "role": "user",
-                    "parts": [
-                        {"text": prompt},
-                        {"inline_data": {"mime_type": "image/jpeg", "data": image_bytes}},
-                    ],
+                    "mime_type":"image/jpeg",
+                    "data":image_bytes
                 }
-            ],
+            ]
         )
         
         # Parse response exactly like web version

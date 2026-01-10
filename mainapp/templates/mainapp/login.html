@@ -56,4 +56,26 @@
         </div>
     </div>
 </div>
+<script>
+firebase.auth().signInWithPopup(provider)
+.then(result => {
+  result.user.getIdToken().then(token => {
+
+    fetch("/firebase-login/", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}"
+      },
+      body: new URLSearchParams({
+        idToken: token
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      window.location.href = "/dashboard/";
+    });
+
+  });
+});
+</script>
 {% endblock %}

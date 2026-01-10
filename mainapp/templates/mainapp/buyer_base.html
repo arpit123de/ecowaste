@@ -49,8 +49,8 @@
                             <i class="bi bi-shop me-1"></i>{{ buyer.shop_name|truncatechars:15 }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end modern-card border-0 shadow-lg mt-2">
-                            <li><a class="dropdown-item" href="{% url 'buyer_profile' %}"><i class="bi bi-person-circle me-2"></i>Profile</a></li>
-                            <li><a class="dropdown-item" href="{% url 'pickup_history' %}"><i class="bi bi-clock-history me-2"></i>History</a></li>
+                            <li><a class="dropdown-item" style="color: #39FF14;" href="{% url 'buyer_profile' %}"><i class="bi bi-person-circle me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" style="color: #39FF14;" href="{% url 'pickup_history' %}"><i class="bi bi-clock-history me-2"></i>History</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form method="post" action="{% url 'logout' %}" class="px-3">
@@ -90,27 +90,27 @@
                     <h5 class="fw-bold mb-3">
                         <i class="bi bi-recycle me-2"></i>EcoWaste Buyer Portal
                     </h5>
-                    <p class="text-muted">Connecting recyclers with waste generators for a cleaner tomorrow.</p>
+                    <p>Connecting recyclers with waste generators for a cleaner tomorrow.</p>
                 </div>
                 <div class="col-md-3">
                     <h6 class="fw-semibold mb-3">Quick Links</h6>
                     <ul class="list-unstyled">
-                        <li><a href="{% url 'buyer_dashboard' %}" class="text-decoration-none text-muted">Dashboard</a></li>
-                        <li><a href="{% url 'buyer_requests' %}" class="text-decoration-none text-muted">New Requests</a></li>
-                        <li><a href="{% url 'buyer_my_pickups' %}" class="text-decoration-none text-muted">My Pickups</a></li>
+                        <li><a href="{% url 'buyer_dashboard' %}" class="text-decoration-none ">Dashboard</a></li>
+                        <li><a href="{% url 'buyer_requests' %}" class="text-decoration-none ">New Requests</a></li>
+                        <li><a href="{% url 'buyer_my_pickups' %}" class="text-decoration-none ">My Pickups</a></li>
                     </ul>
                 </div>
                 <div class="col-md-3">
                     <h6 class="fw-semibold mb-3">Support</h6>
                     <ul class="list-unstyled">
-                        <li><a href="#" class="text-decoration-none text-muted">Help Center</a></li>
-                        <li><a href="#" class="text-decoration-none text-muted">Contact Us</a></li>
-                        <li><a href="{% url 'buyer_profile' %}" class="text-decoration-none text-muted">Profile Settings</a></li>
+                        <li><a href="#" class="text-decoration-none ">Help Center</a></li>
+                        <li><a href="#" class="text-decoration-none ">Contact Us</a></li>
+                        <li><a href="{% url 'buyer_profile' %}" class="text-decoration-none">Profile Settings</a></li>
                     </ul>
                 </div>
             </div>
             <hr class="my-4">
-            <div class="text-center text-muted">
+            <div class="text-center ">
                 <small>&copy; 2026 EcoWaste. Making recycling efficient.</small>
             </div>
         </div>

@@ -1,8 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
-from cryptography.fernet import Fernet
-import os
 
 class Task(models.Model):
     STATUS_CHOICES = [

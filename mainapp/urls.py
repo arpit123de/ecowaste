@@ -30,6 +30,7 @@ urlpatterns = [
     path('signup/', views.signup, name='signup'),
     path('buyer-signup/', views.buyer_signup, name='buyer_signup'),
     path('login/', views.user_login, name='login'),
+   
     
     # Buyer URLs
     path('buyer/dashboard/', views.buyer_dashboard, name='buyer_dashboard'),
@@ -49,5 +50,4 @@ urlpatterns = [
     path('buyer/<int:pk>/rate/', views.rate_buyer, name='rate_buyer'),
     
     # Pickup History
-    path('history/', views.pickup_history, name='pickup_history'),
-]
+    path('history/', views.pickup_history, name='pickup_history') ]

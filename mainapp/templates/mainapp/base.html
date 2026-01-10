@@ -1,3 +1,4 @@
+{% load static %}  
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
@@ -30,7 +31,7 @@
     <nav class="navbar navbar-expand-lg navbar-modern sticky-top">
         <div class="container-fluid px-4">
             <a class="navbar-brand" href="{% url 'home' %}">
-                <i class="bi bi-recycle"></i> <span class="fw-bold">EcoWaste</span>
+                <img style="width: 50px; height: 50px;" src="{% static 'mainapp/css/images/trash.jpg' %}" alt="">
             </a>
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <i class="bi bi-list" style="font-size: 1.5rem; color: var(--text-primary);"></i>
@@ -98,8 +99,8 @@
                             <i class="bi bi-person-circle me-1"></i>{{ user.username|truncatechars:12 }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end modern-card border-0 shadow-lg mt-2">
-                            <li><a class="dropdown-item" href="{% url 'browse_buyers' %}"><i class="bi bi-shop me-2"></i>Browse Buyers</a></li>
-                            <li><a class="dropdown-item" href="{% url 'pickup_history' %}"><i class="bi bi-clock-history me-2"></i>History</a></li>
+                            <li><a class="dropdown-item" style="color: #39FF14;" href="{% url 'browse_buyers' %}"><i class="bi bi-shop me-2"></i>Browse Buyers</a></li>
+                            <li><a class="dropdown-item" style="color: #39FF14;" href="{% url 'pickup_history' %}"><i class="bi bi-clock-history me-2"></i>History</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form method="post" action="{% url 'logout' %}" class="px-3">
@@ -149,11 +150,11 @@
 
     <footer class="text-center py-4" style="background: var(--glass-bg); backdrop-filter: blur(20px); border-top: 1px solid var(--border-color);">
         <div class="container">
-            <p class="text-muted mb-2">
+            <p class=" mb-2">
                 <i class="bi bi-recycle text-success"></i> 
                 <strong>EcoWaste</strong> - Making the world cleaner, one report at a time
             </p>
-            <p class="text-muted small mb-0">
+            <p class=" small mb-0">
                 &copy; 2026 Waste Management System | Built with 💚 for the environment
             </p>
         </div>
